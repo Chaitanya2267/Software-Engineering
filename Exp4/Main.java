@@ -1,8 +1,7 @@
 import java.util.*;
 
-// --- Model Class ---
 class Student {
-    private String id;
+    private final String id;
     private String name;
     private String email;
     private String course;
@@ -48,10 +47,9 @@ class Student {
     }
 }
 
-// --- Service Implementation ---
 class StudentManagementSystem {
-    private Map<String, String> userCredentials = new HashMap<>();
-    private Map<String, Student> studentDatabase = new HashMap<>();
+    private final Map<String, String> userCredentials = new HashMap<>();
+    private final Map<String, Student> studentDatabase = new HashMap<>();
 
     // Sprint 1 / XP Feature: User Registration
     public boolean registerUser(String username, String password) {
@@ -118,8 +116,6 @@ class StudentManagementSystem {
     }
 }
 
-// --- XP Practice: Test-Driven Development (TDD) Runner & Interactive Driver
-// ---
 public class Main {
     public static void main(String[] args) {
         // --- 1. Automated TDD Unit Tests (XP Practice) ---
@@ -170,119 +166,120 @@ public class Main {
     }
 
     private static void runInteractiveApp() {
-        Scanner sc = new Scanner(System.in);
-        StudentManagementSystem sms = new StudentManagementSystem();
-        boolean loggedIn = false;
-
-        while (true) {
-            if (!loggedIn) {
-                System.out.println("\n--- Authentication Menu ---");
-                System.out.println("1. Register");
-                System.out.println("2. Login");
-                System.out.println("3. Exit");
-                System.out.print("Enter choice: ");
-                int choice = sc.nextInt();
-                sc.nextLine();
-
-                if (choice == 1) {
-                    System.out.print("Enter username: ");
-                    String user = sc.nextLine();
-                    System.out.print("Enter password: ");
-                    String pass = sc.nextLine();
-                    if (sms.registerUser(user, pass)) {
-                        System.out.println("Registration successful! You can now log in.");
-                    } else {
-                        System.out.println("Registration failed. Username may already exist.");
+        try (Scanner sc = new Scanner(System.in)) {
+            StudentManagementSystem sms = new StudentManagementSystem();
+            boolean loggedIn = false;
+            
+            OUTER:
+            while (true) {
+                if (!loggedIn) {
+                    System.out.println("\n--- Authentication Menu ---");
+                    System.out.println("1. Register");
+                    System.out.println("2. Login");
+                    System.out.println("3. Exit");
+                    System.out.print("Enter choice: ");
+                    int choice = sc.nextInt();
+                    sc.nextLine();
+                    switch (choice) {
+                        case 1 ->                         {
+                            System.out.print("Enter username: ");
+                            String user = sc.nextLine();
+                            System.out.print("Enter password: ");
+                            String pass = sc.nextLine();
+                            if (sms.registerUser(user, pass)) {
+                                System.out.println("Registration successful! You can now log in.");
+                            } else {
+                                System.out.println("Registration failed. Username may already exist.");
+                            }                              }
+                        case 2 ->                         {
+                            System.out.print("Enter username: ");
+                            String user = sc.nextLine();
+                            System.out.print("Enter password: ");
+                            String pass = sc.nextLine();
+                            if (sms.loginUser(user, pass)) {
+                                loggedIn = true;
+                                System.out.println("Login successful! Welcome, " + user + ".");
+                            } else {
+                                System.out.println("Invalid credentials. Try again.");
+                            }                              }
+                        case 3 -> {
+                            System.out.println("Exiting application.");
+                            break OUTER;
+                        }
+                        default -> {
+                        }
                     }
-                } else if (choice == 2) {
-                    System.out.print("Enter username: ");
-                    String user = sc.nextLine();
-                    System.out.print("Enter password: ");
-                    String pass = sc.nextLine();
-                    if (sms.loginUser(user, pass)) {
-                        loggedIn = true;
-                        System.out.println("Login successful! Welcome, " + user + ".");
-                    } else {
-                        System.out.println("Invalid credentials. Try again.");
+                } else {
+                    System.out.println("\n--- Student Management Dashboard ---");
+                    System.out.println("1. Add Student");
+                    System.out.println("2. Search Student");
+                    System.out.println("3. Update Student");
+                    System.out.println("4. Delete Student");
+                    System.out.println("5. View All Students");
+                    System.out.println("6. Logout");
+                    System.out.print("Enter choice: ");
+                    int choice = sc.nextInt();
+                    sc.nextLine();
+                    
+                    switch (choice) {
+                        case 1 -> {
+                            System.out.print("Enter Student ID: ");
+                            String id = sc.nextLine();
+                            System.out.print("Enter Name: ");
+                            String name = sc.nextLine();
+                            System.out.print("Enter Email: ");
+                            String email = sc.nextLine();
+                            System.out.print("Enter Course: ");
+                            String course = sc.nextLine();
+                            if (sms.addStudent(new Student(id, name, email, course))) {
+                                System.out.println("Student added successfully.");
+                            } else {
+                                System.out.println("Error: Student ID already exists.");
+                            }
+                        }
+                        case 2 -> {
+                            System.out.print("Enter Student ID to search: ");
+                            String searchId = sc.nextLine();
+                            Student found = sms.searchStudent(searchId);
+                            if (found != null) {
+                                System.out.println("Found: " + found);
+                            } else {
+                                System.out.println("Student not found.");
+                            }
+                        }
+                        case 3 -> {
+                            System.out.print("Enter Student ID to update: ");
+                            String updateId = sc.nextLine();
+                            System.out.print("Enter New Name: ");
+                            String newName = sc.nextLine();
+                            System.out.print("Enter New Email: ");
+                            String newEmail = sc.nextLine();
+                            System.out.print("Enter New Course: ");
+                            String newCourse = sc.nextLine();
+                            if (sms.updateStudent(updateId, newName, newEmail, newCourse)) {
+                                System.out.println("Student updated successfully.");
+                            } else {
+                                System.out.println("Student ID not found.");
+                            }
+                        }
+                        case 4 -> {
+                            System.out.print("Enter Student ID to delete: ");
+                            String deleteId = sc.nextLine();
+                            if (sms.deleteStudent(deleteId)) {
+                                System.out.println("Student deleted successfully.");
+                            } else {
+                                System.out.println("Student ID not found.");
+                            }
+                        }
+                        case 5 -> sms.displayAllStudents();
+                        case 6 -> {
+                            loggedIn = false;
+                            System.out.println("Logged out successfully.");
+                        }
+                        default -> System.out.println("Invalid option. Please try again.");
                     }
-                } else if (choice == 3) {
-                    System.out.println("Exiting application.");
-                    break;
-                }
-            } else {
-                System.out.println("\n--- Student Management Dashboard ---");
-                System.out.println("1. Add Student");
-                System.out.println("2. Search Student");
-                System.out.println("3. Update Student");
-                System.out.println("4. Delete Student");
-                System.out.println("5. View All Students");
-                System.out.println("6. Logout");
-                System.out.print("Enter choice: ");
-                int choice = sc.nextInt();
-                sc.nextLine();
-
-                switch (choice) {
-                    case 1:
-                        System.out.print("Enter Student ID: ");
-                        String id = sc.nextLine();
-                        System.out.print("Enter Name: ");
-                        String name = sc.nextLine();
-                        System.out.print("Enter Email: ");
-                        String email = sc.nextLine();
-                        System.out.print("Enter Course: ");
-                        String course = sc.nextLine();
-                        if (sms.addStudent(new Student(id, name, email, course))) {
-                            System.out.println("Student added successfully.");
-                        } else {
-                            System.out.println("Error: Student ID already exists.");
-                        }
-                        break;
-                    case 2:
-                        System.out.print("Enter Student ID to search: ");
-                        String searchId = sc.nextLine();
-                        Student found = sms.searchStudent(searchId);
-                        if (found != null) {
-                            System.out.println("Found: " + found);
-                        } else {
-                            System.out.println("Student not found.");
-                        }
-                        break;
-                    case 3:
-                        System.out.print("Enter Student ID to update: ");
-                        String updateId = sc.nextLine();
-                        System.out.print("Enter New Name: ");
-                        String newName = sc.nextLine();
-                        System.out.print("Enter New Email: ");
-                        String newEmail = sc.nextLine();
-                        System.out.print("Enter New Course: ");
-                        String newCourse = sc.nextLine();
-                        if (sms.updateStudent(updateId, newName, newEmail, newCourse)) {
-                            System.out.println("Student updated successfully.");
-                        } else {
-                            System.out.println("Student ID not found.");
-                        }
-                        break;
-                    case 4:
-                        System.out.print("Enter Student ID to delete: ");
-                        String deleteId = sc.nextLine();
-                        if (sms.deleteStudent(deleteId)) {
-                            System.out.println("Student deleted successfully.");
-                        } else {
-                            System.out.println("Student ID not found.");
-                        }
-                        break;
-                    case 5:
-                        sms.displayAllStudents();
-                        break;
-                    case 6:
-                        loggedIn = false;
-                        System.out.println("Logged out successfully.");
-                        break;
-                    default:
-                        System.out.println("Invalid option. Please try again.");
                 }
             }
         }
-        sc.close();
     }
 }
